@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from PIL import Image
 import openai
 
-app = Flask(__name__)
+app = Flask(__name__) #1
 app.config['UPLOAD_FOLDER'] = './uploads'  # Directory to store uploaded files
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}  # Allowed file extensions
 
