@@ -10,6 +10,13 @@ Filter out unnecessary information, providing a concise version without losing a
 
 <<<  Prompt for o1 preview >>> 
 
+You are about to analyze and explain the reasoning behind a GTO decision and data that pertains to a specific hand. You will also receive some information about GTO knowledge for you to reference during your analysis.
+
+GTO DECISION & DATA:
+...
+
+ASPECT TO ANALYZE THE HAND:
+
 Analyzing Trends in the Figures
 Level 1: MacroAnalysis
 
