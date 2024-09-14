@@ -37,13 +37,14 @@ if submit_button:
     # Check that both an image and comments have been provided
     if uploaded_file is not None and comments:
         # Prepare the data to send to the backend API
-        files = {'image': uploaded_file.getvalue()}
+        # files = {'image': uploaded_file.getvalue()}
         data = {'comments': comments}
-
         # Simulate sending data to backend API
         # Note: Since the API endpoint is a placeholder, the actual request is commented out
         # Replace 'http://api.example.com/upload' with your actual API endpoint
-        # response = requests.post('http://api.example.com/upload', files=files, data=data)
+
+
+        response = requests.post('http://127.0.0.1:5000/upload', files={'image': uploaded_file}, data = data)
 
         # Display a success message to the user
         st.success('Your image and comments have been submitted successfully!')
