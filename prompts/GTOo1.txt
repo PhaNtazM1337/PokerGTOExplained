@@ -1,16 +1,4 @@
-<<< Prompt for extract image >>>
-
-First, from the image, on the right side of the image, extract information under 'Actions' (e.g., all-in, bet, check) which are related to the player's current range. Those information pertains to the player's current RANGE, not the exact hand. 
-
-Secondly, you need to calculate all numerical values and extract precise textual information for the player's current hand by using that information. The players CURRENT HAND is "Ace of Spades and Ten of Diamonds". Determine the specific values for the given hand by assessing the color intensity in the corresponding block that maps to the provided hand. Include percentages, numbers, actions, and any associated text such as labels, names, and descriptions in terms of the color intensity of this hand.
-
-Thirdly, extract information from the filters section (e.g. Hands, Draws, EQ buckets, etc.). 
-
-Filter out unnecessary information, providing a concise version without losing any key details.
-
-<<<  Prompt for o1 preview >>> 
-
-You are about to analyze and explain the reasoning behind a GTO decision and data that pertains to a specific hand. You will also receive some information about GTO knowledge for you to reference during your analysis.
+You are about to analyze and explain the reasoning behind a GTO decision and data that pertains to a specific hand. You will also receive some information about GTO knowledge for you to reference during your analysis. For result, please return the result in terms of a json string that has appropriate layers based on your answer, use ``` to wrap the json string part of your answer.
 
 GTO DECISION & DATA:
 {GTO_data}
