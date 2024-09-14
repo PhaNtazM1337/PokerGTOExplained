@@ -60,7 +60,7 @@ if 'errors' not in st.session_state:
 
 # Initialize form fields in session state
 form_fields = ['effective_stack', 'hole_cards', 'pot_before_flop', 'preflop_action',
-               'flop_cards', 'flop_bet', 'turn_card', 'turn_bet', 'river_card', 'river_bet']
+               'flop_cards', 'flop_action', 'turn_card', 'turn_action', 'river_card', 'river_action', 'final_pot']
 
 for field in form_fields:
     if field not in st.session_state:
@@ -91,11 +91,12 @@ if image_type == 'Game':
             "pot_preflop": 50,
             "preflop_action": "UTG,CO,UTG",
             "flop_cards": "Kh,7s,2d",
-            "flop_bet": 25,
+            "flop_action": "c,15,45,c ## call and check are both c", 
             "turn_card": "5c",
-            "turn_bet": 50,
+            "turn_action": 50,
             "river_card": "Qd",
-            "river_bet": 75
+            "river_action": 75,
+            "final_pot": 100,
         })
 
     # Image uploader
@@ -127,11 +128,12 @@ if image_type == 'Game':
                     st.session_state['pot_before_flop'] = extracted_info.get('pot_before_flop', '')
                     st.session_state['preflop_action'] = extracted_info.get('preflop_action', '')
                     st.session_state['flop_cards'] = extracted_info.get('flop_cards', '')
-                    st.session_state['flop_bet'] = extracted_info.get('flop_bet', '')
+                    st.session_state['flop_action'] = extracted_info.get('flop_action', '')
                     st.session_state['turn_card'] = extracted_info.get('turn_card', '')
-                    st.session_state['turn_bet'] = extracted_info.get('turn_bet', '')
+                    st.session_state['turn_action'] = extracted_info.get('turn_action', '')
                     st.session_state['river_card'] = extracted_info.get('river_card', '')
-                    st.session_state['river_bet'] = extracted_info.get('river_bet', '')
+                    st.session_state['river_action'] = extracted_info.get('river_action', '')
+                    st.session_state['final_pot'] = extracted_info.get('final_pot', '')
                     st.success('Form auto-filled from the image!')
                 else:
                     st.error('Error extracting information from the image.')
@@ -178,11 +180,11 @@ if image_type == 'Game':
             help="Enter the flop cards separated by commas (e.g., 'Kh,7s,2d')"
         )
 
-        flop_bet = st.text_input(
-            "Flop bet",
-            value=st.session_state.get('flop_bet', None),
-            key='flop_bet',
-            help="Enter the bet amount on the flop (e.g., 25)"
+        flop_action = st.text_input(
+            "Flop action",
+            value=st.session_state.get('flop_action', None),
+            key='flop_action',
+            help="Enter the flop action on the flop (e.g. c,15,45,c)"
         )
 
         turn_card = st.text_input(
@@ -192,10 +194,10 @@ if image_type == 'Game':
             help="Enter the turn card (e.g., '5c')"
         )
 
-        turn_bet = st.text_input(
-            "Turn bet",
-            value=st.session_state.get('turn_bet', None),
-            key='turn_bet',
+        turn_action = st.text_input(
+            "Turn action",
+            value=st.session_state.get('turn_action', None),
+            key='turn_action',
             help="Enter the bet amount on the turn (e.g., 50)"
         )
 
@@ -206,11 +208,18 @@ if image_type == 'Game':
             help="Enter the river card (e.g., 'Qd')"
         )
 
-        river_bet = st.text_input(
+        river_action = st.text_input(
             "River bet",
-            value=st.session_state.get('river_bet', None),
-            key='river_bet',
+            value=st.session_state.get('river_action', None),
+            key='river_action',
             help="Enter the bet amount on the river (e.g., 75)"
+        )
+
+        final_pot = st.text_input(
+            "Final Pot",
+            value=st.session_state.get('final_pot', None),
+            key='final_pot',
+            help="Enter the final pot so far (e.g., 100)"
         )
 
         submit_button = st.form_submit_button(label='Submit for Game Analysis')
@@ -222,11 +231,13 @@ if image_type == 'Game':
         pot_before_flop = st.session_state.get('pot_before_flop', '')
         preflop_action = st.session_state.get('preflop_action', '')
         flop_cards = st.session_state.get('flop_cards', '')
-        flop_bet = st.session_state.get('flop_bet', '')
+        flop_action = st.session_state.get('flop_action', '')
         turn_card = st.session_state.get('turn_card', '')
-        turn_bet = st.session_state.get('turn_bet', '')
+        turn_action = st.session_state.get('turn_action', '')
         river_card = st.session_state.get('river_card', '')
-        river_bet = st.session_state.get('river_bet', '')
+        river_action = st.session_state.get('river_action', '')
+        final_pot = st.session_state.get('final_pot', '')
+
 
         # Check if any required form field is empty
         required_fields = {
@@ -235,11 +246,12 @@ if image_type == 'Game':
             'Pot before flop': pot_before_flop,
             'Preflop action': preflop_action,
             'Flop Cards': flop_cards,
-            'Flop bet': flop_bet,
+            'Flop action': flop_action,
             'Turn card': turn_card,
-            'Turn bet': turn_bet,
+            'Turn action': turn_action,
             'River card': river_card,
-            'River bet': river_bet,
+            'River bet': river_action,
+            'Final Pot': final_pot,
         }
 
         empty_fields = [field_name for field_name, value in required_fields.items() if not value]
@@ -255,12 +267,13 @@ if image_type == 'Game':
                 'hole_cards': hole_cards,
                 'pot_before_flop': pot_before_flop,
                 'preflop_action': preflop_action,
-                'flop_cards': flop_cards,
-                'flop_bet': flop_bet,
+                'flop_card': flop_cards,
+                'flop_action': flop_action,
                 'turn_card': turn_card,
-                'turn_bet': turn_bet,
+                'turn_action': turn_action,
                 'river_card': river_card,
-                'river_bet': river_bet,
+                'river_action': river_action,
+                'final_pot': final_pot,
                 'is_game': True
             }
             with st.spinner('Submitting data for analysis...'):

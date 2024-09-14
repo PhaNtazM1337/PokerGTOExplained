@@ -55,7 +55,7 @@ def submit():
     data = convert_numerical_strings_to_int(d)
     hc = data["hole_cards"].replace(",", '')
     del data['hole_cards']
-    data['flop_cards'] = data['flop_cards'].replace(",", '')
+    data['flop_card'] = data['flop_card'].replace(",", '')
     # data = {
     #     "effective_stack": 900,
     #     "pot_before_flop": 200,

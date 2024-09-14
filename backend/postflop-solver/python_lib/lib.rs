@@ -12,12 +12,13 @@ fn solve_poker_spot(py: Python, inputs: &PyDict) -> PyResult<PyObject> {
     let effective_stack: i32 = inputs.get_item("effective_stack").unwrap().extract()?;
     let pot_before_flop: i32 = inputs.get_item("pot_before_flop").unwrap().extract()?;
     let preflop_action: String = inputs.get_item("preflop_action").unwrap().extract()?;
-    let flop_cards: String = inputs.get_item("flop_cards").unwrap().extract()?;
-    let flop_bet: Option<i32> = inputs.get_item("flop_bet").unwrap().extract()?;
+    let flop_cards: String = inputs.get_item("flop_card").unwrap().extract()?;
+    let flop_actions: Option<String> = inputs.get_item("flop_action").unwrap().extract()?;
     let turn_card: Option<String> = inputs.get_item("turn_card").unwrap().extract()?;
-    let turn_bet: Option<i32> = inputs.get_item("turn_bet").unwrap().extract()?;
+    let turn_actions: Option<String> = inputs.get_item("turn_action").unwrap().extract()?;
     let river_card: Option<String> = inputs.get_item("river_card").unwrap().extract()?;
-    let river_bet: Option<i32> = inputs.get_item("river_bet").unwrap().extract()?;
+    let river_actions: Option<String> = inputs.get_item("river_action").unwrap().extract()?;
+    let final_pot: f32 = inputs.get_item("final_pot").unwrap().extract()?;
 
     let (ranges_path, position1, position2) = construct_ranges_path(&preflop_action);
     println!("Ranges path: {}", ranges_path);
@@ -25,19 +26,6 @@ fn solve_poker_spot(py: Python, inputs: &PyDict) -> PyResult<PyObject> {
     // Determine who is in position
     let order1 = position_to_order(&position1);
     let order2 = position_to_order(&position2);
-
-    // Calculate the total pot based on bets made on the flop, turn, and river
-    let mut pot = pot_before_flop as f32;
-
-    if let Some(flop_bet_amount) = flop_bet {
-        pot += 2.0 * flop_bet_amount as f32; // Assuming both players put in the bet
-    }
-    if let Some(turn_bet_amount) = turn_bet {
-        pot += 2.0 * turn_bet_amount as f32;
-    }
-    if let Some(river_bet_amount) = river_bet {
-        pot += 2.0 * river_bet_amount as f32;
-    }
 
     let (oop_position, ip_position) = if order1 < order2 {
         (position1.clone(), position2.clone())
@@ -81,23 +69,17 @@ fn solve_poker_spot(py: Python, inputs: &PyDict) -> PyResult<PyObject> {
     // Set up card configuration
     let card_config = CardConfig {
         range: [oop_range, ip_range],
-        flop,
-        turn,
-        river,
+        flop: flop,
+        turn: NOT_DEALT,
+        river: NOT_DEALT,
     };
 
     // Define bet sizes (simplified for this example)
-    let bet_sizes = BetSizeOptions::try_from(("50%, a", "2.5x")).unwrap();
-
+    let bet_sizes = BetSizeOptions::try_from(("33%, 75%, 150%, a", "33%, 100%, a")).unwrap();
+    let donk_sizes = DonkSizeOptions::try_from(("33%")).unwrap();
     // Set up tree configuration
     let tree_config = TreeConfig {
-        initial_state: if river != NOT_DEALT {
-            BoardState::River
-        } else if turn != NOT_DEALT {
-            BoardState::Turn
-        } else {
-            BoardState::Flop
-        },
+        initial_state: BoardState::Flop,
         starting_pot: pot_before_flop,
         effective_stack,
         rake_rate: 0.0,
@@ -105,8 +87,8 @@ fn solve_poker_spot(py: Python, inputs: &PyDict) -> PyResult<PyObject> {
         flop_bet_sizes: [bet_sizes.clone(), bet_sizes.clone()],
         turn_bet_sizes: [bet_sizes.clone(), bet_sizes.clone()],
         river_bet_sizes: [bet_sizes.clone(), bet_sizes],
-        turn_donk_sizes: None,
-        river_donk_sizes: None,
+        turn_donk_sizes: Some(donk_sizes.clone()),
+        river_donk_sizes: Some(donk_sizes),
         add_allin_threshold: 1.5,
         force_allin_threshold: 0.15,
         merging_threshold: 0.1,
@@ -118,11 +100,48 @@ fn solve_poker_spot(py: Python, inputs: &PyDict) -> PyResult<PyObject> {
 
     // Allocate memory and solve the game
     game.allocate_memory(false);
-    let max_num_iterations = 10000;
-    let target_exploitability = game.tree_config().starting_pot as f32 * 0.0001;
+    let max_num_iterations = 1000;
+    let target_exploitability = game.tree_config().starting_pot as f32 * 0.01;
     solve(&mut game, max_num_iterations, target_exploitability, true);
 
     // Cache normalized weights
+
+    if let Some(flop_actions) = flop_actions {
+        for num_str in flop_actions.split(',') {
+            // Convert the string slice to an integer
+            match num_str.trim().parse::<usize>() {
+                Ok(num) => game.play(num),
+                Err(_) => println!("Invalid number: {}", num_str),
+            }
+        }
+    }
+
+    if turn != NOT_DEALT {
+        game.play(turn as usize);
+        if let Some(turn_actions) = turn_actions {
+            for num_str in turn_actions.split(',') {
+                // Convert the string slice to an integer
+                match num_str.trim().parse::<usize>() {
+                    Ok(num) => game.play(num),
+                    Err(_) => println!("Invalid number: {}", num_str),
+                }
+            }
+        }
+    }
+
+    if river != NOT_DEALT {
+        game.play(river as usize);
+        if let Some(river_actions) = river_actions {
+            for num_str in river_actions.split(',') {
+                // Convert the string slice to an integer
+                match num_str.trim().parse::<usize>() {
+                    Ok(num) => game.play(num),
+                    Err(_) => println!("Invalid number: {}", num_str),
+                }
+            }
+        }
+    }
+
     game.cache_normalized_weights();
 
     // Get equities and EVs for both players
@@ -144,8 +163,8 @@ fn solve_poker_spot(py: Python, inputs: &PyDict) -> PyResult<PyObject> {
         hand_info.set_item("EV", evs_oop[i])?;
         hand_info.set_item("Equity", equities_oop[i])?;
         // Handle division by zero
-        let eqr = if equities_oop[i] != 0.0 && pot != 0.0 {
-            (evs_oop[i] / equities_oop[i]) / pot
+        let eqr = if equities_oop[i] != 0.0 && final_pot != 0.0 {
+            (evs_oop[i] / equities_oop[i]) / final_pot
         } else {
             0.0
         };
@@ -181,8 +200,8 @@ fn solve_poker_spot(py: Python, inputs: &PyDict) -> PyResult<PyObject> {
         let mut hand_info = PyDict::new(py);
         hand_info.set_item("EV", evs_ip[i])?;
         hand_info.set_item("Equity", equities_ip[i])?;
-        let eqr = if equities_ip[i] != 0.0 && pot != 0.0 {
-            (evs_ip[i] / equities_ip[i]) / pot
+        let eqr = if equities_ip[i] != 0.0 && final_pot != 0.0 {
+            (evs_ip[i] / equities_ip[i]) / final_pot
         } else {
             0.0
         };
