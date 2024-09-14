@@ -11,7 +11,7 @@ import importlib.util
 import sys
 from pathlib import Path
 
-# Get the path to the module with a hyphen
+
 module_path = Path('postflop-solver/main.py')
 
 # Dynamically load the module
@@ -94,7 +94,6 @@ def upload_autofill():
         "Content-Type": "application/json",
         "Authorization": f"Bearer {openai.api_key}"
         }
-        
         with open("../prompts/Autofill.txt", "r") as f:
             Autofill = f.read()
         f.close()

@@ -3,4 +3,4 @@
 python backend/app.py &
 
 # Run Streamlit frontend in the frontend folder
-streamlit run frontend/main.py &
+streamlit run ../frontend/main.py &
