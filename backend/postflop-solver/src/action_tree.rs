@@ -43,6 +43,22 @@ pub enum Action {
     Chance(Card),
 }
 
+impl Action {
+    // Convert the Action enum to a string representation
+    pub fn to_string(&self) -> String {
+        match self {
+            Action::None => "None".to_string(),
+            Action::Fold => "Fold".to_string(),
+            Action::Check => "Check".to_string(),
+            Action::Call => "Call".to_string(),
+            Action::Bet(amount) => format!("Bet({})", amount),
+            Action::Raise(amount) => format!("Raise({})", amount),
+            Action::AllIn(amount) => format!("AllIn({})", amount),
+            Action::Chance(card) => format!("Chance({})", card.to_string()), // Assuming `Card` has `to_string`
+        }
+    }
+}
+
 /// An enum representing the board state.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, PartialOrd, Ord)]
 #[repr(u8)]

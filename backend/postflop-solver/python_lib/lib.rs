@@ -26,7 +26,6 @@ fn solve_poker_spot(py: Python, inputs: &PyDict) -> PyResult<PyObject> {
     let order1 = position_to_order(&position1);
     let order2 = position_to_order(&position2);
 
-
     // Calculate the total pot based on bets made on the flop, turn, and river
     let mut pot = pot_before_flop as f32;
 
@@ -154,6 +153,29 @@ fn solve_poker_spot(py: Python, inputs: &PyDict) -> PyResult<PyObject> {
         hero_dict.set_item(hand_str, hand_info)?;
     }
 
+    // Convert the legal actions to a list
+    let action_list = game.available_actions();
+    let mut action_list_ret = PyDict::new(py);
+    for (i, action) in action_list.iter().enumerate() {
+        action_list_ret.set_item(i, action.to_string())?;
+    }
+    // Calculate Hero overall range action probabilities
+    let hero_range_action_prob = game.strategy();
+    let num_hands = oop_hands_str.len();
+    let num_actions = hero_range_action_prob.len() / num_hands;
+
+    for (i, hand_str) in oop_hands_str.iter().enumerate() {
+        let mut actions_prob_list = Vec::new();
+        for j in 0..num_actions {
+            let prob = hero_range_action_prob[j * num_hands + i];
+            actions_prob_list.push(prob);
+        }
+        hero_dict
+            .get_item(hand_str)
+            .unwrap()
+            .set_item("Actions Probabilities", actions_prob_list)?;
+    }
+
     let mut villain_dict = PyDict::new(py);
     for (i, hand_str) in ip_hands_str.iter().enumerate() {
         let mut hand_info = PyDict::new(py);
@@ -178,6 +200,7 @@ fn solve_poker_spot(py: Python, inputs: &PyDict) -> PyResult<PyObject> {
     result.set_item("Villain", villain_dict)?;
     result.set_item("Hero Equity Buckets", hero_buckets)?;
     result.set_item("Villain Equity Buckets", villain_buckets)?;
+    result.set_item("Legal Actions", action_list_ret)?;
 
     Ok(result.into())
 }
@@ -196,8 +219,10 @@ fn position_to_order(position: &str) -> u8 {
 
 fn construct_ranges_path(preflop_action: &str) -> (String, String, String) {
     // Base directory for ranges
-    let mut path_elements =
-        vec!["C:\\Users\\yixiu\\Desktop\\PokerGTOExplained\\backend\\postflop-solver\\GTOWizard_Scraped_Ranges\\Cash6m50z100bbGeneral".to_string()];
+    let mut path_elements = vec![
+        "C:\\Users\\yixiu\\Desktop\\PokerGTOExplained\\backend\\postflop-solver\\GTOWizard_Scraped_Ranges"
+            .to_string(),
+    ];
 
     // Define the standard order of positions in a 6-max game
     let standard_positions = vec!["UTG", "HJ", "CO", "BTN", "SB", "BB"];
