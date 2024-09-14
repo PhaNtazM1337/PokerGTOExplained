@@ -30,6 +30,11 @@ def encode_image(image_path):
 def index():
     return render_template('index.html')
 
+@app.route('/submit', methods = ['POST'])
+def submit():
+    
+    pass
+
 @app.route('/fill', methods = ['POST'])
 def upload_autofill():
     # Check if the request contains a file
