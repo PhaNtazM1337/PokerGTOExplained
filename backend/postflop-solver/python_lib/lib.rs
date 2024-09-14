@@ -56,12 +56,20 @@ fn solve_poker_spot(py: Python, inputs: &PyDict) -> PyResult<PyObject> {
     // Parse flop, turn, river cards
     let flop = flop_from_str(&flop_cards).unwrap();
     let turn = if let Some(card) = turn_card {
-        card_from_str(&card).unwrap()
+        if card == "" {
+            NOT_DEALT
+        } else {
+            card_from_str(&card).unwrap()
+        }
     } else {
         NOT_DEALT
     };
     let river = if let Some(card) = river_card {
-        card_from_str(&card).unwrap()
+        if card == "" {
+            NOT_DEALT
+        } else {
+            card_from_str(&card).unwrap()
+        }
     } else {
         NOT_DEALT
     };
@@ -75,7 +83,7 @@ fn solve_poker_spot(py: Python, inputs: &PyDict) -> PyResult<PyObject> {
     };
 
     // Define bet sizes (simplified for this example)
-    let bet_sizes = BetSizeOptions::try_from(("33%, 75%, 150%, a", "33%, 100%, a")).unwrap();
+    let bet_sizes = BetSizeOptions::try_from(("33%, 75%, 150%, a", "2.5x")).unwrap();
     let donk_sizes = DonkSizeOptions::try_from(("33%")).unwrap();
     // Set up tree configuration
     let tree_config = TreeConfig {
@@ -238,10 +246,8 @@ fn position_to_order(position: &str) -> u8 {
 
 fn construct_ranges_path(preflop_action: &str) -> (String, String, String) {
     // Base directory for ranges
-    let mut path_elements = vec![
-        "C:\\Users\\yixiu\\Desktop\\PokerGTOExplained\\backend\\postflop-solver\\GTOWizard_Scraped_Ranges\\Cash6m50z100bbGeneral"
-            .to_string(),
-    ];
+    let mut path_elements =
+        vec!["/Users/arararz/Downloads/GTOWizard_Scraped_Ranges/Cash6m50z100bbGeneral".to_string()];
 
     // Define the standard order of positions in a 6-max game
     let standard_positions = vec!["UTG", "HJ", "CO", "BTN", "SB", "BB"];
