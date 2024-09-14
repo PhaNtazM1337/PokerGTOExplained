@@ -125,7 +125,7 @@ def upload_file():
         f.close()
 
         payload = {
-        "model": "gpt-4o-mini",
+        "model": "gpt-4o",
         "messages": [
             {
             "role": "user",
@@ -153,9 +153,13 @@ def upload_file():
         with open("../prompts/GTOo1.txt", "r") as f:
             GTOo1_prompt = f.read()
         f.close()
-        GTOo1_prompt = GTOo1_prompt.format(GTO_data = GTO_data)
+
+        with open("../prompts/sample_response.txt", "r") as f:
+            sample_response = f.read()
+        f.close()
+        GTOo1_prompt = GTOo1_prompt.format(GTO_data = GTO_data, sample_response = sample_response)
         response = client.chat.completions.create(
-                model="gpt-4o",
+                model="gpt-4o-mini",
                 messages=[
                     {"role": "user", "content": GTOo1_prompt}
                 ]
@@ -164,8 +168,7 @@ def upload_file():
         # print(content)
         content = content.split("```")[1]
         content = content[content.find("{"):]
-        # ans = json.loads(content)
-        # print(ans)
+        print(content)
         return content, 200
     else:
         return jsonify({'error': 'File type not allowed'}), 400

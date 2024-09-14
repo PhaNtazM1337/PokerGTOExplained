@@ -1,4 +1,4 @@
-You are about to analyze and explain the reasoning behind a GTO decision and data that pertains to a specific hand. You will also receive some information about GTO knowledge for you to reference during your analysis. For result, please return the result in terms of a json string that has appropriate layers based on your answer, use ``` to wrap the json string part of your answer.
+You are about to analyze and explain the reasoning behind a GTO decision and data that pertains to a specific hand. You will also receive some information about GTO knowledge for you to reference during your analysis. Your audience is new to poker, therefore, in your response, you need to be informative and knowledgeable. For the format of the response, please return the result in terms of a json string that follows the SAMPLE RESPONSE FORMAT, use ``` to wrap the json string part of your answer.
 
 GTO DECISION & DATA:
 {GTO_data}
@@ -28,3 +28,6 @@ Aggression in Strong Ranges: The overall trend indicates that aggressive strateg
 Range Evolution and Polarization: As hands progress, ranges tend to become narrower and more polarized. Recognizing this evolution helps players make more informed decisions, particularly on the river, where the distinction between value hands and bluffs becomes clearer.
 Blocker Effects for Strategic Depth: Micro-level analysis highlights the importance of blocker and unblocker effects. Utilizing hands with blocking qualities can enhance bluffing success, while hands that unblock weaker ranges can optimize value extraction.
 By incorporating these trends into strategic play, players can make more calculated decisions that maximize EV across different stages of the game.
+
+SAMPLE RESPONSE FORMAT:
+{sample_response}
