@@ -1,0 +1,5 @@
+streamlit
+flask
+python-dotenv
+openai
+pillow
