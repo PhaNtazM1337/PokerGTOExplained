@@ -34,6 +34,8 @@ def upload_file():
         return jsonify({'error': 'No file part'}), 400
     
     file = request.files['image']
+    is_game = request.form.get('is_game') == 'True' 
+    print(is_game)
 
     
     # If user does not select a file
@@ -44,7 +46,6 @@ def upload_file():
         filename = file.filename
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
-        
         image_type = filepath.split('.')[-1]
         if image_type not in {'png', 'jpg', 'jpeg'}:
             return jsonify({'error': 'File type not allowed'}), 400
