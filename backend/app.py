@@ -7,6 +7,19 @@ import base64
 import requests
 import json
 import re
+import importlib.util
+import sys
+from pathlib import Path
+
+# Get the path to the module with a hyphen
+module_path = Path('postflop-solver/main.py')
+
+# Dynamically load the module
+spec = importlib.util.spec_from_file_location("my_module", module_path)
+solver = importlib.util.module_from_spec(spec)
+sys.modules["my_module"] = solver
+spec.loader.exec_module(solver)
+
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = './uploads'  # Directory to store uploaded files
@@ -32,8 +45,30 @@ def index():
 
 @app.route('/submit', methods = ['POST'])
 def submit():
-    
-    pass
+    def convert_numerical_strings_to_int(d):
+        for key, value in d.items():
+            if isinstance(value, str) and value.isdigit():  # Check if value is a digit string
+                d[key] = int(value)  # Convert to integer
+        return d
+
+    d = request.form.to_dict()
+    data = convert_numerical_strings_to_int(d)
+    del data['hole_cards']
+    data['flop_cards'] = data['flop_cards'].replace(",", '')
+    # data = {
+    #     "effective_stack": 900,
+    #     "pot_before_flop": 200,
+    #     "preflop_action": "BTN,SB,BB,SB",
+    #     "flop_cards": "Td9d6h",
+    #     "flop_bet": 120,  # Example value
+    #     "turn_card": "Qc",
+    #     "turn_bet": 200,  # Example value
+    #     "river_card": "7s",
+    #     "river_bet": 300,  # Example value
+    # }
+    res = solver.process(data)
+    print(res)
+    return jsonify(res), 200
 
 @app.route('/fill', methods = ['POST'])
 def upload_autofill():

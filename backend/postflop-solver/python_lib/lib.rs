@@ -9,15 +9,15 @@ use std::path::PathBuf;
 #[pyfunction]
 fn solve_poker_spot(py: Python, inputs: &PyDict) -> PyResult<PyObject> {
     // Extract inputs from the Python dictionary
-    let effective_stack: i32 = inputs.get_item("Effective stack").unwrap().extract()?;
-    let pot_before_flop: i32 = inputs.get_item("Pot before flop").unwrap().extract()?;
-    let preflop_action: String = inputs.get_item("Preflop action").unwrap().extract()?;
-    let flop_cards: String = inputs.get_item("Flop Cards").unwrap().extract()?;
-    let flop_bet: Option<i32> = inputs.get_item("Flop bet").unwrap().extract()?;
-    let turn_card: Option<String> = inputs.get_item("Turn card").unwrap().extract()?;
-    let turn_bet: Option<i32> = inputs.get_item("Turn bet").unwrap().extract()?;
-    let river_card: Option<String> = inputs.get_item("River card").unwrap().extract()?;
-    let river_bet: Option<i32> = inputs.get_item("River bet").unwrap().extract()?;
+    let effective_stack: i32 = inputs.get_item("effective_stack").unwrap().extract()?;
+    let pot_before_flop: i32 = inputs.get_item("pot_before_flop").unwrap().extract()?;
+    let preflop_action: String = inputs.get_item("preflop_action").unwrap().extract()?;
+    let flop_cards: String = inputs.get_item("flop_cards").unwrap().extract()?;
+    let flop_bet: Option<i32> = inputs.get_item("flop_bet").unwrap().extract()?;
+    let turn_card: Option<String> = inputs.get_item("turn_card").unwrap().extract()?;
+    let turn_bet: Option<i32> = inputs.get_item("turn_bet").unwrap().extract()?;
+    let river_card: Option<String> = inputs.get_item("river_card").unwrap().extract()?;
+    let river_bet: Option<i32> = inputs.get_item("river_bet").unwrap().extract()?;
 
     let (ranges_path, position1, position2) = construct_ranges_path(&preflop_action);
     println!("Ranges path: {}", ranges_path);
@@ -25,6 +25,20 @@ fn solve_poker_spot(py: Python, inputs: &PyDict) -> PyResult<PyObject> {
     // Determine who is in position
     let order1 = position_to_order(&position1);
     let order2 = position_to_order(&position2);
+
+
+    // Calculate the total pot based on bets made on the flop, turn, and river
+    let mut pot = pot_before_flop as f32;
+
+    if let Some(flop_bet_amount) = flop_bet {
+        pot += 2.0 * flop_bet_amount as f32; // Assuming both players put in the bet
+    }
+    if let Some(turn_bet_amount) = turn_bet {
+        pot += 2.0 * turn_bet_amount as f32;
+    }
+    if let Some(river_bet_amount) = river_bet {
+        pot += 2.0 * river_bet_amount as f32;
+    }
 
     let (oop_position, ip_position) = if order1 < order2 {
         (position1.clone(), position2.clone())
@@ -131,8 +145,8 @@ fn solve_poker_spot(py: Python, inputs: &PyDict) -> PyResult<PyObject> {
         hand_info.set_item("EV", evs_oop[i])?;
         hand_info.set_item("Equity", equities_oop[i])?;
         // Handle division by zero
-        let eqr = if equities_oop[i] != 0.0 {
-            evs_oop[i] / equities_oop[i]
+        let eqr = if equities_oop[i] != 0.0 && pot != 0.0 {
+            (evs_oop[i] / equities_oop[i]) / pot
         } else {
             0.0
         };
@@ -145,8 +159,8 @@ fn solve_poker_spot(py: Python, inputs: &PyDict) -> PyResult<PyObject> {
         let mut hand_info = PyDict::new(py);
         hand_info.set_item("EV", evs_ip[i])?;
         hand_info.set_item("Equity", equities_ip[i])?;
-        let eqr = if equities_ip[i] != 0.0 {
-            evs_ip[i] / equities_ip[i]
+        let eqr = if equities_ip[i] != 0.0 && pot != 0.0 {
+            (evs_ip[i] / equities_ip[i]) / pot
         } else {
             0.0
         };
