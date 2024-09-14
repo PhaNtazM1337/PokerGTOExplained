@@ -43,7 +43,7 @@ if submit_button:
         # Simulate sending data to backend API
         # Note: Since the API endpoint is a placeholder, the actual request is commented out
         # Replace 'http://api.example.com/upload' with your actual API endpoint
-        # response = requests.post('http://api.example.com/upload', files=files, data=data)
+        response = requests.post('http://127.0.0.1/upload', files=files, data=data)
 
         # Display a success message to the user
         st.success('Your image and comments have been submitted successfully!')
