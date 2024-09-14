@@ -3,3 +3,9 @@
 
 # Ignore the uploads folder in the backend
 /Backend/uploads/
+
+# Ignore the .env file in the backend folder
+/backend/.env
+
+# Ignore the uploads folder in the backend
+/backend/uploads/
