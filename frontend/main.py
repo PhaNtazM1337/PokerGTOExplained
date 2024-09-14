@@ -1,5 +1,47 @@
 import streamlit as st
 import requests
+import json
+
+def dict_to_markdown(d, level=0):
+    md_content = ""
+    indent = "  " * level
+    for key, value in d.items():
+        if isinstance(value, dict):
+            md_content += f"{indent}- **{key}**:\n"
+            md_content += dict_to_markdown(value, level + 1)
+        elif isinstance(value, list):
+            md_content += f"{indent}- **{key}**:\n"
+            for item in value:
+                md_content += f"{indent}  - {item}\n"
+        else:
+            md_content += f"{indent}- **{key}**:\n {value}\n"
+    return md_content
+
+# def dict_to_html(d, level=0):
+#     html_content = ""
+#     indent = "  " * level
+#     for key, value in d.items():
+#         if isinstance(value, dict):
+#             html_content += f"{indent}<h3 style='color:blue;'>{key}</h3>\n"
+#             html_content += dict_to_html(value, level + 1)
+#         else:
+#             html_content += f"{indent}<h3 style='color:blue;'>{key}</h3>\n"
+#             html_content += f"{indent}<p>{value}</p>\n"
+#     return html_content
+
+def dict_to_html(d, level=0):
+    html_content = ""
+    indent = "  " * level * 2  # Increase indentation for nested levels
+    header_size = min(level+3, 6)  # Decrease header size as depth increases (from h3 to h6)
+    margin = f"margin-left: {level * 30}px;" 
+    for key, value in d.items():
+        if isinstance(value, dict):
+            html_content += f"<h{header_size} style='color:#EE82EE; {margin}'>{indent}{key}</h{header_size}>\n"
+            html_content += dict_to_html(value, level + 1)
+        else:
+            html_content += f"<h{header_size} style='color:#EE82EE; {margin}'>{indent}{key}</h{header_size}>\n"
+            html_content += f"<p style = '{margin}'>{indent}{value}<br><br></p>"
+    return html_content
 
 # Set page configuration
 st.set_page_config(
@@ -271,6 +313,12 @@ elif image_type == 'GTO':
                 response = requests.post('http://127.0.0.1:5000/upload', files={'image': uploaded_file}, data=data)
                 if response.status_code == 200:
                     st.success('Your image has been submitted successfully!')
+                    gto_response = response.json()
+                    markdown_data = dict_to_markdown(gto_response)
+                    html_data = dict_to_html(gto_response)
+                    # display_json_hierarchy(gto_response)
+                    # st.markdown(markdown_data)
+                    st.markdown(html_data, unsafe_allow_html=True)
                 else:
                     st.error('Error submitting the image. Please try again.')
         else:
