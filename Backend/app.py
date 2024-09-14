@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request,render_template, jsonify
 from PIL import Image
 import openai
 
@@ -12,6 +12,10 @@ openai.api_key = 'your-openai-api-key'
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 # Route to upload an image
 @app.route('/upload', methods=['POST'])
@@ -41,7 +45,7 @@ def upload_file():
         image_description = "Image uploaded and processed."
 
         # Now, pass this to GPT-4-turbo (this example assumes you're sending text to GPT-4-turbo)
-        response = openai.ChatCompletion.create(
+        response = openai.chat.completions.create(
             model="gpt-4-turbo",
             messages=[
                 {"role": "system", "content": "You are an image description assistant."},
