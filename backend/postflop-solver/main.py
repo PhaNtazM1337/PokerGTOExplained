@@ -24,20 +24,10 @@ def process(inputs):
     villain_ranges = result["Villain"]
     hero_buckets = result["Hero Equity Buckets"]
     villain_buckets = result["Villain Equity Buckets"]
+    legal_actions = result["Legal Actions"]
 
     # Print the results
-    print("Hero Ranges:")
-    for hand, info in hero_ranges.items():
-        print(f"{hand}: EV={info['EV']}, Equity={info['Equity']}, EQR={info['EQR']}")
+    print(result)
 
-    print("\nVillain Ranges:")
-    for hand, info in villain_ranges.items():
-        print(f"{hand}: EV={info['EV']}, Equity={info['Equity']}, EQR={info['EQR']}")
-
-    print("\nHero Equity Buckets:")
-    print(hero_buckets)
-
-    print("\nVillain Equity Buckets:")
-    print(villain_buckets)
-
+    # 
     return result

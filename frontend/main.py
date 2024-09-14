@@ -276,6 +276,12 @@ if image_type == 'Game':
 
                 if response.status_code == 200:
                     st.success('Your data has been submitted successfully!')
+                    gto_response = response.json()
+                    markdown_data = dict_to_markdown(gto_response)
+                    html_data = dict_to_html(gto_response)
+                    # display_json_hierarchy(gto_response)
+                    # st.markdown(markdown_data)
+                    st.markdown(html_data, unsafe_allow_html=True)
                 else:
                     st.error('Error submitting the data. Please try again.')
 

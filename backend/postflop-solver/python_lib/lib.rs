@@ -220,7 +220,7 @@ fn position_to_order(position: &str) -> u8 {
 fn construct_ranges_path(preflop_action: &str) -> (String, String, String) {
     // Base directory for ranges
     let mut path_elements = vec![
-        "C:\\Users\\yixiu\\Desktop\\PokerGTOExplained\\backend\\postflop-solver\\GTOWizard_Scraped_Ranges"
+        "C:\\Users\\yixiu\\Desktop\\PokerGTOExplained\\backend\\postflop-solver\\GTOWizard_Scraped_Ranges\\Cash6m50z100bbGeneral"
             .to_string(),
     ];
 

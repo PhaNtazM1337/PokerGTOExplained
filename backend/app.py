@@ -53,6 +53,7 @@ def submit():
 
     d = request.form.to_dict()
     data = convert_numerical_strings_to_int(d)
+    hc = data["hole_cards"].replace(",", '')
     del data['hole_cards']
     data['flop_cards'] = data['flop_cards'].replace(",", '')
     # data = {
@@ -67,8 +68,47 @@ def submit():
     #     "river_bet": 300,  # Example value
     # }
     res = solver.process(data)
-    print(res)
-    return jsonify(res), 200
+    # compute avg
+    all_ranges = []
+    for k in res["Hero"]:
+        probs = res["Hero"][k]["Actions Probabilities"]
+        all_ranges.append(probs)
+    ans = []
+    for j in range(len(all_ranges[0])):
+        s = 0
+        for i in range(len(all_ranges)):
+            s += all_ranges[i][j]
+        s /= len(all_ranges)
+        ans.append(s)
+    hero_bucket = res['Hero Equity Buckets']
+    villain_bucket = res['Villain Equity Buckets']
+    actions = res['Legal Actions']
+    hand_info = res['Hero'][hc]
+
+    all_info = {}
+    all_info["Hero overall range action probabilities"] = ans
+    all_info["Hero bucket"] = hero_bucket
+    all_info["Villain bucket"] = villain_bucket
+    all_info["Hand info"] = hand_info
+    
+    with open("../prompts/GTOo1.txt", "r") as f:
+        GTOo1_prompt = f.read()
+    f.close()
+
+    with open("../prompts/sample_response.txt", "r") as f:
+        sample_response = f.read()
+    f.close()
+    GTOo1_prompt = GTOo1_prompt.format(GTO_data = jsonify(all_info), sample_response = sample_response)
+    response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "user", "content": GTOo1_prompt}
+            ]
+        )
+    content = response.choices[0].message.content
+    content = content.split("```")[1]
+    content = content[content.find("{"):]
+    return content, 200
 
 @app.route('/fill', methods = ['POST'])
 def upload_autofill():
