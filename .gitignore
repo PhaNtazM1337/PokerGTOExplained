@@ -9,3 +9,7 @@
 
 # Ignore the uploads folder in the backend
 /backend/uploads/
+
+/backend/postflop-solver/GTOWizard_Scraped_Ranges
+
+/backend/postflop-solver/target

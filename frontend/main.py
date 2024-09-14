@@ -230,7 +230,7 @@ if image_type == 'Game':
                 else:
                     # Send data without image
                     print(data)
-                    response = requests.post('http://127.0.0.1:5000/upload', data=data)
+                    response = requests.post('http://127.0.0.1:5000/submit', data=data)
 
                 if response.status_code == 200:
                     st.success('Your data has been submitted successfully!')

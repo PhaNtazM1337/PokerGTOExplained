@@ -1,0 +1,10 @@
+implementation=CPython
+version=3.12
+shared=true
+abi3=false
+lib_name=python3.12
+lib_dir=/Users/arararz/anaconda3/envs/explainablegto/lib
+executable=/Users/arararz/anaconda3/envs/explainablegto/bin/python3
+pointer_width=64
+build_flags=WITH_THREAD
+suppress_build_script_link_lines=false
