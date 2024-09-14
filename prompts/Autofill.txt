@@ -1,0 +1,13 @@
+Analyze this online poker game from the screenshot and return a json similar to this. Note that T is for 10. d, h, c, s is diamond, heart, club and spade. Effective stack is min of my stack and opponent stack (assume 2 players). {
+    "effective_stack": "100",
+    "hole_cards" : "As,Td",
+    "pot_preflop": "50",
+    "preflop_action": "UTG,CO,UTG", 
+    "flop_cards": "Kh,7s,2d",
+    "flop_bet": "25",
+    "turn_card": "5c",
+    "turn_bet": "50",
+    "river_card": "Qd",
+    "river_bet": "75"
+}
+If some fields cannot be determined, omit the entries in the json completely. just include fields you know the value for. All fields should be strings. Also use my format. 
