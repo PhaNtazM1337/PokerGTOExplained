@@ -45,6 +45,9 @@ def upload_file():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         file.save(filepath)
         
+        image_type = filepath.split('.')[-1]
+        if image_type not in {'png', 'jpg', 'jpeg'}:
+            return jsonify({'error': 'File type not allowed'}), 400
         base64_image = encode_image(filepath)
         headers = {
         "Content-Type": "application/json",
@@ -64,7 +67,7 @@ def upload_file():
                 {
                 "type": "image_url",
                 "image_url": {
-                    "url": f"data:image/png;base64,{base64_image}"
+                    "url": f"data:image/{image_type};base64,{base64_image}"
                 }
                 }
             ]
@@ -76,6 +79,9 @@ def upload_file():
         response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
         msg = response.json()['choices'][0]['message']['content']
         print(msg)
+
+        # gpt4o for later parsing
+
         return msg
     
     return jsonify({'error': 'File type not allowed'}), 400
