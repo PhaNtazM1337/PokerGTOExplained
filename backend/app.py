@@ -5,14 +5,17 @@ from PIL import Image
 import openai
 import base64
 import requests
+import json
 
-app = Flask(__name__) #1
+app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = './uploads'  # Directory to store uploaded files
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg'}  # Allowed file extensions
 
 # OpenAI API key setup
 load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
+
+client = openai.OpenAI()
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
@@ -35,57 +38,77 @@ def upload_file():
     
     file = request.files['image']
     is_game = request.form.get('is_game') == 'True' 
-    print(is_game)
 
-    
-    # If user does not select a file
-    if file.filename == '':
-        return jsonify({'error': 'No selected file'}), 400
-    
-    if file and allowed_file(file.filename):
-        filename = file.filename
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-        image_type = filepath.split('.')[-1]
-        if image_type not in {'png', 'jpg', 'jpeg'}:
-            return jsonify({'error': 'File type not allowed'}), 400
-        base64_image = encode_image(filepath)
-        headers = {
-        "Content-Type": "application/json",
-        "Authorization": f"Bearer {openai.api_key}"
-        }
-
-        payload = {
-        "model": "gpt-4o-mini",
-        "messages": [
-            {
-            "role": "user",
-            "content": [
-                {
-                "type": "text",
-                "text": "What’s in this image?"
-                },
-                {
-                "type": "image_url",
-                "image_url": {
-                    "url": f"data:image/{image_type};base64,{base64_image}"
-                }
-                }
-            ]
+    if is_game:
+        return "Not Implemented"
+    else:
+        if file.filename == '':
+            return jsonify({'error': 'No selected file'}), 400
+        
+        if file and allowed_file(file.filename):
+            filename = file.filename
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+            image_type = filepath.split('.')[-1]
+            
+            if image_type not in {'png', 'jpg', 'jpeg'}:
+                return jsonify({'error': 'File type not allowed'}), 400
+            base64_image = encode_image(filepath)
+            
+            headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {openai.api_key}"
             }
-        ],
-        "max_tokens": 300
-        }
+            
+            with open("../prompts/GTOextract.txt", "r") as f:
+                GTOextract_prompt = f.read()
+            f.close()
 
-        response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
-        msg = response.json()['choices'][0]['message']['content']
-        print(msg)
+            payload = {
+            "model": "gpt-4o-mini",
+            "messages": [
+                {
+                "role": "user",
+                "content": [
+                    {
+                    "type": "text",
+                    "text": GTOextract_prompt
+                    },
+                    {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/{image_type};base64,{base64_image}"
+                    }
+                    }
+                ]
+                }
+            ],
+            "max_tokens": 300
+            }
 
-        # gpt4o for later parsing
+            response = requests.post("https://api.openai.com/v1/chat/completions", headers=headers, json=payload)
+            GTO_data = response.json()['choices'][0]['message']['content']
 
-        return msg
-    
-    return jsonify({'error': 'File type not allowed'}), 400
+            # gpt4o (o1) for response
+            with open("../prompts/GTOo1.txt", "r") as f:
+                GTOo1_prompt = f.read()
+            f.close()
+            GTOo1_prompt = GTOo1_prompt.format(GTO_data = GTO_data)
+            response = client.chat.completions.create(
+                    model="o1-preview",
+                    messages=[
+                        {"role": "user", "content": GTOo1_prompt}
+                    ]
+                )
+            content = response.choices[0].message.content
+            # print(content)
+            content = content.split("```")[1]
+            content = content[content.find("{"):]
+            ans = json.loads(content)
+            print(ans)
+            return ans
+        else:
+            return jsonify({'error': 'File type not allowed'}), 400
 
 if __name__ == '__main__':
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

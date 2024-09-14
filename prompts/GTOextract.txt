@@ -1,0 +1,7 @@
+First, from the image, on the right side of the image, extract information under 'Actions' (e.g., all-in, bet, check) which are related to the player's current range. Those information pertains to the player's current RANGE, not the exact hand. 
+
+Secondly, you need to calculate all numerical values and extract precise textual information for the player's current hand by using that information. The players CURRENT HAND is "Ace of Spades and Ten of Diamonds". Determine the specific values for the given hand by assessing the color intensity in the corresponding block that maps to the provided hand. Include percentages, numbers, actions, and any associated text such as labels, names, and descriptions in terms of the color intensity of this hand.
+
+Thirdly, extract information from the filters section (e.g. Hands, Draws, EQ buckets, etc.). 
+
+Filter out unnecessary information, providing a concise version without losing any key details.
